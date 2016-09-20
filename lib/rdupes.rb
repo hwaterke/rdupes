@@ -1,7 +1,7 @@
 require "rdupes/version"
 
 module Rdupes
-  class Rdupes
+  class Finder
 
   end
 end
