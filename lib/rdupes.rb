@@ -1,6 +1,7 @@
 require "rdupes/version"
 require 'logger'
 require 'shellwords'
+require 'tmpdir'
 
 module Rdupes
   class Finder
