@@ -11,6 +11,11 @@ module Rdupes
       @logger.level = Logger::WARN
       @reference_directories = []
       @search_directories = []
+      @quiet = false
+    end
+
+    def quiet!
+      @quiet = true
     end
 
     def add_reference_directory(directory)
@@ -35,8 +40,10 @@ module Rdupes
       raise 'No directories provided for duplicate search' if @search_directories.empty?
       raise 'fdupes needs to be installed' unless command? 'fdupes'
 
-      puts "Processing #{@search_directories}"
-      puts "Reference directory: #{@reference_directories}"
+      unless @quiet
+        puts "Processing #{@search_directories}"
+        puts "Reference directory: #{@reference_directories}"
+      end
 
       # Redirect to file
       cmd = "fdupes -rq #{directories_for_search.shelljoin} > duplicates.log"
