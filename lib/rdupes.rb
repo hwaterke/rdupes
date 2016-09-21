@@ -13,10 +13,15 @@ module Rdupes
       @search_directories = []
       @counters = Hash.new(0)
       @quiet = false
+      @keep = false
     end
 
     def quiet!
       @quiet = true
+    end
+
+    def keep!
+      @keep = true
     end
 
     def add_reference_directory(directory)
@@ -46,13 +51,17 @@ module Rdupes
         puts "Reference directory: #{@reference_directories}"
       end
 
-      # Redirect to file
-      cmd = "fdupes -rq #{directories_for_search.shelljoin} > duplicates.log"
-      @logger.debug "Executing: #{cmd}"
-      r = system cmd
-      raise "fdupe crashed " unless r
-      process_fdupes_result('duplicates.log')
-      puts "Deleted #{@counters[:deleted]} files" unless @quiet
+      Dir.mktmpdir do |dir|
+        fdupe_output = File.join(dir, 'duplicates.log')
+        # Redirect to file
+        cmd = "fdupes -rq #{directories_for_search.shelljoin} > #{fdupe_output}"
+        @logger.debug "Executing: #{cmd}"
+        r = system cmd
+        raise "fdupe crashed " unless r
+        process_fdupes_result(fdupe_output)
+        FileUtils.cp fdupe_output, "#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}_duplicates.log" if @keep
+        puts "Deleted #{@counters[:deleted]} files" unless @quiet
+      end
     end
 
     private
