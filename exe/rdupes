@@ -1,3 +1,30 @@
 #!/usr/bin/env ruby
 
 require "rdupes"
+require 'optparse'
+
+rdupe = Rdupes::Finder.new
+
+opt_parser = OptionParser.new do |opts|
+  opts.banner = "Usage: rdupes [options] path"
+
+  opts.on('-r', '--reference DIRECTORY', "Add DIRECTORY to the reference directories.", "No files will ever be touched in this directory.") do |directory|
+    rdupe.add_reference_directory directory
+  end
+
+  opts.on("-q", "--quiet", "Runs quietly") do |q|
+    rdupe.quiet!
+  end
+
+  opts.on("-l", "--logging", "Enables verbose logging") do |l|
+    rdupe.logger.level = Logger::DEBUG
+  end
+
+  opts.on("-h", "--help", "Prints this help") do
+    puts opts
+    exit
+  end
+end
+
+opt_parser.parse!(ARGV)
+rdupe.process(ARGV)
