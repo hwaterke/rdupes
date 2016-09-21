@@ -11,6 +11,7 @@ module Rdupes
       @logger.level = Logger::WARN
       @reference_directories = []
       @search_directories = []
+      @counters = Hash.new(0)
       @quiet = false
     end
 
@@ -51,6 +52,7 @@ module Rdupes
       r = system cmd
       raise "fdupe crashed " unless r
       process_fdupes_result('duplicates.log')
+      puts "Deleted #{@counters[:deleted]} files" unless @quiet
     end
 
     private
@@ -88,6 +90,7 @@ module Rdupes
     end
 
     def handle_duplicate_file(duplicate_file)
+      @counters[:deleted] += 1
       @logger.debug "Handling duplicate #{duplicate_file}"
       File.delete(duplicate_file)
     end
