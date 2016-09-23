@@ -12,6 +12,10 @@ opt_parser = OptionParser.new do |opts|
     rdupe.add_reference_directory directory
   end
 
+  opts.on("-d", "--dryrun", "Runs the analysis but without any file deletion") do |q|
+    rdupe.dry_run!
+  end
+
   opts.on("-q", "--quiet", "Runs quietly") do |q|
     rdupe.quiet!
   end

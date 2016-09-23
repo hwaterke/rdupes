@@ -15,14 +15,22 @@ module Rdupes
       @counters = Hash.new(0)
       @quiet = false
       @keep = false
+      @dry_run = false
     end
 
     def quiet!
+      @logger.debug "Enabling quiet mode"
       @quiet = true
     end
 
     def keep!
+      @logger.debug "Enabling keep mode. Will keep the fdupes output"
       @keep = true
+    end
+
+    def dry_run!
+      @logger.debug "Enabling dry run mode"
+      @dry_run = true
     end
 
     def add_reference_directory(directory)
@@ -47,25 +55,36 @@ module Rdupes
       raise 'No directories provided for duplicate search' if @search_directories.empty?
       raise 'fdupes needs to be installed' unless command? 'fdupes'
 
-      unless @quiet
-        puts "Processing #{@search_directories}"
-        puts "Reference directory: #{@reference_directories}"
-      end
+      say "Processing #{@search_directories}"
+      say "Reference directory: #{@reference_directories}"
 
       Dir.mktmpdir do |dir|
-        fdupe_output = File.join(dir, 'duplicates.log')
+        fdupes_output = File.join(dir, 'duplicates.log')
         # Redirect to file
-        cmd = "fdupes -rq #{directories_for_search.shelljoin} > #{fdupe_output}"
+        cmd = "fdupes -rq #{directories_for_search.shelljoin} > #{fdupes_output}"
         @logger.debug "Executing: #{cmd}"
         r = system cmd
         raise "fdupe crashed " unless r
-        process_fdupes_result(fdupe_output)
-        FileUtils.cp fdupe_output, "#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}_duplicates.log" if @keep
-        puts "Deleted #{@counters[:deleted]} files" unless @quiet
+        process_fdupes_result(fdupes_output)
+
+        if @keep
+          fdupes_output_copy = "#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}_duplicates.log"
+          say "Copying fdupes result to #{fdupes_output_copy}"
+          FileUtils.cp fdupes_output, fdupes_output_copy
+        end
+
+        say "Found #{@counters[:duplicate_groups]} duplicate groups"
+        say "Found #{@counters[:duplicate_entries]} duplicate entries"
+        say "Flagged #{@counters[:flag_for_delete]} files for deletion"
+        say "Deleted #{@counters[:deleted]} files"
       end
     end
 
     private
+
+    def say(text)
+      puts text unless @quiet
+    end
 
     def command?(command)
       system("which #{ command} > /dev/null 2>&1")
@@ -91,6 +110,8 @@ module Rdupes
 
     def handle_duplicate_group(duplicate_group)
       @logger.debug "Handling group of #{duplicate_group.size} duplicates"
+      @counters[:duplicate_groups] += 1
+      @counters[:duplicate_entries] += duplicate_group.size
       reference_files, duplicate_files = duplicate_group.partition do |f|
         @reference_directories.any? { |rf| File.expand_path(f).start_with?(rf) }
       end
@@ -100,9 +121,12 @@ module Rdupes
     end
 
     def handle_duplicate_file(duplicate_file)
-      @counters[:deleted] += 1
       @logger.debug "Handling duplicate #{duplicate_file}"
-      File.delete(duplicate_file)
+      @counters[:flag_for_delete] += 1
+      unless @dry_run
+        File.delete(duplicate_file)
+        @counters[:deleted] += 1
+      end
     end
   end
 end
