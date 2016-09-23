@@ -2,6 +2,7 @@ require "rdupes/version"
 require 'logger'
 require 'shellwords'
 require 'tmpdir'
+require 'colorize'
 
 module Rdupes
   class Finder
@@ -110,19 +111,22 @@ module Rdupes
 
     def handle_duplicate_group(duplicate_group)
       @logger.debug "Handling group of #{duplicate_group.size} duplicates"
+      say "#{'==>'.blue} Group of #{duplicate_group.size} duplicates"
       @counters[:duplicate_groups] += 1
       @counters[:duplicate_entries] += duplicate_group.size
       reference_files, duplicate_files = duplicate_group.partition do |f|
         @reference_directories.any? { |rf| File.expand_path(f).start_with?(rf) }
       end
       # Keep the first duplicate if there is no reference file.
-      duplicate_files.shift if reference_files.empty?
+      say "- #{duplicate_files.shift}".green if reference_files.empty?
+      reference_files.each { |rf| say "- #{rf}".green }
       duplicate_files.each { |dp| handle_duplicate_file(dp) }
     end
 
     def handle_duplicate_file(duplicate_file)
       @logger.debug "Handling duplicate #{duplicate_file}"
       @counters[:flag_for_delete] += 1
+      say "- #{duplicate_file}".red
       unless @dry_run
         File.delete(duplicate_file)
         @counters[:deleted] += 1
