@@ -1,7 +1,7 @@
-require "spec_helper"
+require 'spec_helper'
 
 describe Rdupes do
-  it "has a version number" do
+  it 'has a version number' do
     expect(Rdupes::VERSION).not_to be nil
   end
 
@@ -30,35 +30,35 @@ describe Rdupes do
 
     describe 'without reference directory' do
 
-      it "keeps different file" do
+      it 'keeps different file' do
         should_remain add_input 'hello'
         should_remain add_input 'world'
         @finder.process([@dir])
         assert_files
       end
 
-      it "keeps one copy out of two" do
+      it 'keeps one copy out of two' do
         should_remain add_input 'hello'
         should_go add_input 'hello'
         @finder.process([@dir])
         assert_files
       end
 
-      it "keeps one copy out of ten" do
+      it 'keeps one copy out of ten' do
         should_remain add_input 'hello'
         9.times { should_go add_input 'hello' }
         @finder.process([@dir])
         assert_files
       end
 
-      it "works with subdirectories" do
+      it 'works with subdirectories' do
         should_remain add_input 'hello', 'a', 'b', 'c'
         should_go add_input 'hello', 'z', 'y', 'x'
         @finder.process([@dir])
         assert_files
       end
 
-      it "works with multiple groups of duplicates" do
+      it 'works with multiple groups of duplicates' do
         should_remain add_input 'one'
         should_remain add_input 'two'
         should_remain add_input 'three'
@@ -68,7 +68,7 @@ describe Rdupes do
         @finder.process([@dir])
       end
 
-      it "works when repeating input folders" do
+      it 'works when repeating input folders' do
         should_remain add_input 'one', 'a', 'b', 'c'
         should_remain add_input 'two', 'a', 'b', 'c'
         should_remain add_input 'three', 'a', 'b', 'c'
@@ -82,7 +82,7 @@ describe Rdupes do
 
     describe 'with reference directory' do
 
-      it "keeps all files in reference_directories" do
+      it 'keeps all files in reference_directories' do
         should_remain add_input 'one', 'b'
         should_remain add_input 'one', 'b', 'a'
         should_remain add_input 'one', 'b', 'b'
@@ -94,7 +94,7 @@ describe Rdupes do
         assert_files
       end
 
-      it "keeps copy in reference directory" do
+      it 'keeps copy in reference directory' do
         should_go add_input 'hello', 'a'
         should_remain add_input 'hello', 'b'
         @finder.add_reference_directory File.join(@dir, 'b')
@@ -102,7 +102,7 @@ describe Rdupes do
         assert_files
       end
 
-      it "keeps copy in reference directory, deletes all copies outside" do
+      it 'keeps copy in reference directory, deletes all copies outside' do
         should_go add_input 'hello', 'a'
         should_go add_input 'hello', 'a', 'x'
         should_go add_input 'hello', 'a', 'y'

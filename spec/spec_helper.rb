@@ -1,12 +1,12 @@
-$LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
-require "rdupes"
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+require 'rdupes'
 require 'fileutils'
 
 def add_input(content, *paths)
   destination_directory = File.expand_path(File.join(@dir, *paths))
   FileUtils.mkpath(destination_directory)
   basename = content.gsub(/\W+/, '')[0..20]
-  basename = "unknown" unless basename.size > 0
+  basename = 'unknown' unless basename.size > 0
   file = File.join(destination_directory, basename)
   i = 1
   while File.exists?(file)

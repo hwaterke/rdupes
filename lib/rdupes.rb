@@ -1,4 +1,4 @@
-require "rdupes/version"
+require 'rdupes/version'
 require 'logger'
 require 'shellwords'
 require 'tmpdir'
@@ -20,17 +20,17 @@ module Rdupes
     end
 
     def quiet!
-      @logger.debug "Enabling quiet mode"
+      @logger.debug 'Enabling quiet mode'
       @quiet = true
     end
 
     def keep!
-      @logger.debug "Enabling keep mode. Will keep the fdupes output"
+      @logger.debug 'Enabling keep mode. Will keep the fdupes output'
       @keep = true
     end
 
     def dry_run!
-      @logger.debug "Enabling dry run mode"
+      @logger.debug 'Enabling dry run mode'
       @dry_run = true
     end
 
@@ -65,7 +65,7 @@ module Rdupes
         cmd = "fdupes -rq #{directories_for_search.shelljoin} > #{fdupes_output}"
         @logger.debug "Executing: #{cmd}"
         r = system cmd
-        raise "fdupe crashed " unless r
+        raise 'fdupe crashed ' unless r
         process_fdupes_result(fdupes_output)
 
         if @keep
