@@ -17,6 +17,7 @@ module Rdupes
       @quiet = false
       @keep = false
       @dry_run = false
+      @with_reference = false
     end
 
     def quiet!
@@ -32,6 +33,11 @@ module Rdupes
     def dry_run!
       @logger.debug 'Enabling dry run mode'
       @dry_run = true
+    end
+
+    def with_reference!
+      @logger.debug 'Enabling with reference mode'
+      @with_reference = true
     end
 
     def add_reference_directory(directory)
@@ -117,10 +123,18 @@ module Rdupes
       reference_files, duplicate_files = duplicate_group.partition do |f|
         @reference_directories.any? { |rf| File.expand_path(f).start_with?(rf) }
       end
-      # Keep the first duplicate if there is no reference file.
-      say "- #{duplicate_files.shift}".green if reference_files.empty?
       reference_files.each { |rf| say "- #{rf}".green }
-      duplicate_files.each { |dp| handle_duplicate_file(dp) }
+      if reference_files.empty?
+        if @with_reference
+          duplicate_files.each { |dp| say "- #{dp}".green }
+        else
+          # Keep the first duplicate if there is no reference file.
+          say "- #{duplicate_files.shift}".green
+          duplicate_files.each { |dp| handle_duplicate_file(dp) }
+        end
+      else
+        duplicate_files.each { |dp| handle_duplicate_file(dp) }
+      end
     end
 
     def handle_duplicate_file(duplicate_file)

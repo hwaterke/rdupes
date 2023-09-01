@@ -24,6 +24,10 @@ opt_parser = OptionParser.new do |opts|
     rdupe.keep!
   end
 
+  opts.on('--withref', 'Only removes files if they exist in reference directories.') do
+    rdupe.with_reference!
+  end
+
   opts.on('-l', '--logging', 'Enables verbose logging') do |l|
     rdupe.logger.level = Logger::DEBUG
   end
